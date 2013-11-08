@@ -9,7 +9,7 @@ class galera (
   $wsrep_sst_auth   = '',) {
   package { "galera":
     ensure  => present,
-    require => Package["mysql-client-5.5"],
+    require => Package["mysql_client"],
   }
 
   file { "/etc/mysql/conf.d/wsrep.cnf":
