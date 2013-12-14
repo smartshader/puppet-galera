@@ -2,6 +2,7 @@
 class galera (
   $cluster_name     = 'galera',
   $master_ip        = false,
+  $package_name     = 'galera',
   $wsrep_provider   = '/usr/lib/galera/libgalera_smm.so',
   $wsrep_node_name  = $::hostname,
   $wsrep_notify_cmd = '',
@@ -9,6 +10,7 @@ class galera (
   $wsrep_sst_auth   = '',) {
   package { "galera":
     ensure  => present,
+    name    => $package_name,
     require => Package["mysql_client"],
   }
 
