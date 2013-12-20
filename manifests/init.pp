@@ -8,16 +8,16 @@ class galera (
   $wsrep_notify_cmd = '',
   $wsrep_sst_method = 'xtrabackup',
   $wsrep_sst_auth   = '',) {
-  package { "galera":
+  package { 'galera':
     ensure  => present,
     name    => $package_name,
-    require => Package["mysql_client"],
+    require => Package['mysql_client'],
   }
 
-  file { "/etc/mysql/conf.d/wsrep.cnf":
+  file { '/etc/mysql/conf.d/wsrep.cnf':
     ensure  => present,
-    content => template("galera/wsrep.cnf.erb"),
-    require => Package["galera"],
+    content => template('galera/wsrep.cnf.erb'),
+    require => Package['galera'],
   }
 
 }
