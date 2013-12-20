@@ -129,7 +129,7 @@ wsrep_sst_receive_address=<%= @wsrep_sst_receive_address %>
 
 # SST authentication string. This will be used to send SST to joining nodes.
 # Depends on SST method. For mysqldump method it is root:<root password>
-wsrep_sst_auth=<%= @wsrep_sst_auth %>
+wsrep_sst_auth=<%= @real_wsrep_sst_auth %>
 
 # Desired SST donor name.
 wsrep_sst_donor=<%= @wsrep_sst_donor %>

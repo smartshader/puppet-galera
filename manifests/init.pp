@@ -9,9 +9,34 @@ class galera (
   $wsrep_node_incoming_address = $::ipaddress,
   $wsrep_notify_cmd            = '',
   $wsrep_sst_method            = 'xtrabackup',
-  $wsrep_sst_auth              = 'root:root',
+  $wsrep_sst_auth_user         = 'root',
+  $wsrep_sst_auth_password     = 'root',
+  $wsrep_sst_auth              = '',
   $wsrep_sst_receive_address   = $::ipaddress,
   $wsrep_sst_donor             = $::hostname,) {
+  # validate parameters
+  validate_string($wsrep_sst_auth_user)
+  validate_string($wsrep_sst_auth_password)
+  validate_string($wsrep_sst_auth)
+  validate_string($cluster_name)
+  validate_string($package_name)
+  validate_string($wsrep_sst_method)
+  validate_string($wsrep_node_name)
+
+  validate_absolute_path($wsrep_provider)
+
+  if empty($wsrep_sst_auth_user) and empty($wsrep_sst_auth_password) and !empty($wsrep_sst_auth) {
+    $real_wsrep_sst_auth = $wsrep_sst_auth
+  } else {
+    $real_wsrep_sst_auth = "${wsrep_sst_auth_user}:${wsrep_sst_auth_password}"
+  }
+
+  mysql_user { "${wsrep_sst_auth_user}@%":
+    ensure        => present,
+    password_hash => mysql_password($wsrep_sst_auth_password),
+    require       => Class['::mysql::server::service'],
+  }
+
   package { 'galera':
     ensure  => present,
     name    => $package_name,
