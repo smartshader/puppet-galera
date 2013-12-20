@@ -67,10 +67,10 @@ wsrep_node_name=<%= @wsrep_node_name %>
 # Base replication <address|hostname>[:port] of the node.
 # The values supplied will be used as defaults for state transfer receiving,
 # listening ports and so on. Default: address of the first network interface.
-#wsrep_node_address=
+wsrep_node_address=<%= @wsrep_node_address %>
 
 # Address for incoming client connections. Autodetect by default.
-#wsrep_node_incoming_address=
+wsrep_node_incoming_address=<%= @wsrep_node_incoming_address %>
 
 # How many threads will process writesets from other nodes
 wsrep_slave_threads=1
@@ -125,14 +125,14 @@ wsrep_sst_method=<%= @wsrep_sst_method %>
 # Address which donor should send State Snapshot to.
 # Should be the address of THIS node. DON'T SET IT TO DONOR ADDRESS!!!
 # (SST method dependent. Defaults to the first IP of the first interface)
-#wsrep_sst_receive_address=
+wsrep_sst_receive_address=<%= @wsrep_sst_receive_address %>
 
 # SST authentication string. This will be used to send SST to joining nodes.
 # Depends on SST method. For mysqldump method it is root:<root password>
 wsrep_sst_auth=<%= @wsrep_sst_auth %>
 
 # Desired SST donor name.
-#wsrep_sst_donor=
+wsrep_sst_donor=<%= @wsrep_sst_donor %>
 
 # Reject client queries when donating SST (false)
 #wsrep_sst_donor_rejects_queries=0
