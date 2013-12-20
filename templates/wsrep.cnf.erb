@@ -39,7 +39,7 @@ query_cache_type=0
 # Override bind-address
 # In some systems bind-address defaults to 127.0.0.1, and with mysqldump SST
 # it will have (most likely) disastrous consequences on donor node
-bind-address=0.0.0.0
+bind-address=<%= @mysql_bind_address %>
 
 ##
 ## WSREP options
@@ -49,7 +49,7 @@ bind-address=0.0.0.0
 wsrep_provider=<%= @wsrep_provider -%>
 
 # Provider specific configuration options
-#wsrep_provider_options=
+wsrep_provider_options=<%= @wsrep_provider_options -%>
 
 # Logical cluster name. Should be the same for all nodes.
 wsrep_cluster_name="<%= @cluster_name -%>"
