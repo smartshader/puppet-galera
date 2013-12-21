@@ -49,7 +49,7 @@ class galera (
     ensure  => present,
     content => template('galera/wsrep.cnf.erb'),
     require => Package['galera'],
-    before  => Class['::mysql::server::service'],
+    notify  => Class['::mysql::server::service'],
   }
 
 }
