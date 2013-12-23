@@ -10,7 +10,7 @@ class galera (
   $wsrep_node_address          = $::ipaddress,
   $wsrep_node_incoming_address = $::ipaddress,
   $wsrep_notify_cmd            = '',
-  $wsrep_sst_method            = 'xtrabackup',
+  $wsrep_sst_method            = 'xtrabackup-v2',
   $wsrep_sst_auth_user         = 'root',
   $wsrep_sst_auth_password     = 'root',
   $wsrep_sst_auth              = '',
