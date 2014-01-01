@@ -31,24 +31,15 @@ class galera::health_check(
 ) {
 
   # Needed to manage /etc/services
-  include augeas
+  include ::augeas
+
+  # xinetd runs the checking script
+  include ::xinetd
 
   if $enabled {
     $service_ensure = 'running'
    } else {
     $service_ensure = 'stopped'
-  }
-
-  service { 'xinetd' :
-    ensure      => $service_ensure,
-    enable      => $enabled,
-    require     => [Package['xinetd'],File["${xinetd_dir}/mysqlchk"]],
-    subscribe   => File["${xinetd_dir}/mysqlchk"],
-  }
-
-  package { 'xinetd':
-    ensure  => present,
-    require => Package["mysql-server-wsrep","galera","mysql-client-5.5"],
   }
 
   file { $mysqlchk_script_dir:
@@ -59,18 +50,10 @@ class galera::health_check(
     group   => 'root',
   }
 
-  file { $xinetd_dir:
-    ensure  => directory,
-    mode    => '0755',
-    require => Package['xinetd'],
-    owner   => 'root',
-    group   => 'root',
-  }
-
-  file { "${mysqlchk_script_dir}/galera_chk":
+  file { "${mysqlchk_script_dir}/clustercheck":
     mode    => '0755',
     require => File[$mysqlchk_script_dir],
-    content => template("galera/galera_chk"),
+    content => template("galera/clustercheck.erb"),
     owner   => 'root',
     group   => 'root',
   }
@@ -78,10 +61,24 @@ class galera::health_check(
   file { "${xinetd_dir}/mysqlchk":
     mode    => '0644',
     require => File[$xinetd_dir],
-    content => template("galera/mysqlchk"),
+    content => template("galera/mysqlchk.erb"),
     owner   => 'root',
     group   => 'root',  
   }
+
+  # setup mysqlchk service
+  xinetd::service {"mysqlchk":
+    disable     => 'no',
+    flags       => 'REUSE',
+    socket_type => 'stream',
+    port        => '9200',
+    wait        => 'no',  
+    user        => nobody,
+    server      => "${mysqlchk_script_dir}/clustercheck",
+    log_on_failure => 'USERID',
+    only_from   => '0.0.0.0/0'
+    per_source  => "UNLIMITED",
+  }  
 
   # Manage mysqlchk service in /etc/services
   augeas { "mysqlchk":
@@ -97,10 +94,9 @@ class galera::health_check(
   }
 
   # Create a user for script to use for checking MySQL health status.
-  galera::db { 'mysql':
-    user     => $mysqlchk_user,
-    password => $mysqlchk_password,
-    host     => $mysql_host,
-    grant    => ['all']
+  mysql_user { "${mysqlchk_user}@${mysql_host}":
+    ensure        => present,
+    password_hash => mysql_password($mysqlchk_password),
+    require       => Class['::mysql::server::service'],
   }
 }
