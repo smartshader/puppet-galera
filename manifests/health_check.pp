@@ -23,11 +23,13 @@ class galera::health_check(
   $mysql_host           = '127.0.0.1',
   $mysql_port           = '3306',
   $mysql_bin_dir        = '/usr/bin/mysql',
+  $mysql_datadir        = '/var/lib/mysql',
   $mysqlchk_script_dir  = '/usr/local/bin',
   $xinetd_dir 	        = '/etc/xinetd.d',
   $mysqlchk_user        = 'mysqlchk_user',
   $mysqlchk_password    = 'mysqlchk_password',
   $enabled              = true,
+  $debug                = 0,
 ) {
 
   # Needed to manage /etc/services
@@ -58,25 +60,17 @@ class galera::health_check(
     group   => 'root',
   }
 
-  file { "${xinetd_dir}/mysqlchk":
-    mode    => '0644',
-    require => File[$xinetd_dir],
-    content => template("galera/mysqlchk.erb"),
-    owner   => 'root',
-    group   => 'root',  
-  }
-
   # setup mysqlchk service
   xinetd::service {"mysqlchk":
     disable     => 'no',
     flags       => 'REUSE',
     socket_type => 'stream',
     port        => '9200',
-    wait        => 'no',  
+    wait        => 'no',
     user        => nobody,
     server      => "${mysqlchk_script_dir}/clustercheck",
     log_on_failure => 'USERID',
-    only_from   => '0.0.0.0/0'
+    only_from   => '0.0.0.0/0',
     per_source  => "UNLIMITED",
   }  
 
@@ -89,7 +83,7 @@ class galera::health_check(
       "set service-name[last()] mysqlchk",
       "set service-name[. = 'mysqlchk']/port 9200",
       "set service-name[. = 'mysqlchk']/protocol tcp",
-    ],  
+    ],
     onlyif => "match service-name[port = '9200'] size == 0",
   }
 

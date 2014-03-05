@@ -15,7 +15,8 @@ class galera (
   $wsrep_sst_auth_password     = 'root',
   $wsrep_sst_auth              = '',
   $wsrep_sst_receive_address   = $::ipaddress,
-  $wsrep_sst_donor             = '',) {
+  $wsrep_sst_donor             = '',
+  $wsrep_slave_threads         = 1,) {
   # validate parameters
   validate_string($wsrep_sst_auth_user)
   validate_string($wsrep_sst_auth_password)

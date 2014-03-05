@@ -11,6 +11,8 @@
 # The purpose of this script is make haproxy capable of monitoring mysql properly
 #
 
+#### Parameters
+DEBUG=<%= @debug %>
 MYSQL_HOST="<%= @mysql_host %>"
 MYSQL_PORT="<%= @mysql_port %>"
 MYSQL_USERNAME="<%= @mysqlchk_user%>"
@@ -19,10 +21,21 @@ MYSQL_OPTS="-N -q -A"
 TMP_FILE="/dev/shm/mysqlchk.$$.out"
 ERR_FILE="/dev/shm/mysqlchk.$$.err"
 FORCE_FAIL="/dev/shm/proxyoff"
-MYSQL_BIN="<%= @mysql_bin_dir %>"
-CHECK_QUERY="show global status where variable_name='wsrep_local_state'"
+MYSQL_BIN=`which mysql`
+CHECK_QUERY="show global status where variable_name like 'wsrep_%'"
+DISK_CHECK=`df -m <%= @mysql_datadir %> | grep -v 'Avail' | awk '{print $4}'`
+
+
+#### Functions
+debug_log()
+{
+    if [ $DEBUG -eq 1 ]; then
+        echo -e "DEBUG: ${1}"
+    fi
+}
 preflight_check()
 {
+    debug_log "preflight_check()"
     for I in "$TMP_FILE" "$ERR_FILE"; do
         if [ -f "$I" ]; then
             if [ ! -w $I ]; then
@@ -36,8 +49,21 @@ preflight_check()
         fi
     done
 }
+check_disk_space()
+{
+    debug_log "check_disk_space()"
+    if [ $DISK_CHECK -lt 500 ]; then
+        echo -e "HTTP/1.1 503 Service Unavailable\r\n"
+        echo -e "Content-Type: Content-Type: text/plain\r\n"
+        echo -e "\r\n"
+        echo -e "Running out of disk\r\n"
+        echo -e "\r\n"
+        exit 1
+    fi
+}
 return_ok()
 {
+    debug_log "return_ok()"
     echo -e "HTTP/1.1 200 OK\r\n"
     echo -e "Content-Type: text/html\r\n"
     echo -e "Content-Length: 43\r\n"
@@ -49,29 +75,81 @@ return_ok()
 }
 return_fail()
 {
+    debug_log "return_fail()"
     echo -e "HTTP/1.1 503 Service Unavailable\r\n"
     echo -e "Content-Type: text/html\r\n"
     echo -e "Content-Length: 42\r\n"
     echo -e "\r\n"
-    echo -e "<html><body>MySQL is *down*.</body></html>\r\n"
+    echo -e "<html><body>Node *down*: ${1}.</body></html>\r\n"
     sed -e 's/\n$/\r\n/' $ERR_FILE
     echo -e "\r\n"
     rm $ERR_FILE $TMP_FILE
     exit 1
 }
+
+
+#### start of the script
+
+# can we write to /dev/shm?
 preflight_check
+
+# is there enough disk space?
+check_disk_space
+
+# if there is a file called /dev/shm/proxyoff the node will be taken out of haproxy
 if [ -f "$FORCE_FAIL" ]; then
         echo "$FORCE_FAIL found" > $ERR_FILE
-        return_fail;
+        return_fail "lockfile exists";
 fi
-$MYSQL_BIN $MYSQL_OPTS --host=$MYSQL_HOST --port=$MYSQL_PORT --user=$MYSQL_USERNAME --password=$MYSQL_PASSWORD -e "$CHECK_QUERY" > $TMP_FILE 2> $ERR_FILE
-if [ $? -ne 0 ]; then
-        return_fail;
-fi
-status=`cat  $TMP_FILE | awk '{print $2;}'`
 
-if [ $status -ne 4 ] && [ $status -ne 2 ]; then
-   return_fail;
+# execute our query check: get value of wsrep_local_state:
+#This variable shows internal Galera state number. Possible values are:
+#1 - Joining (requesting/receiving State Transfer) - node is joining the cluster
+#2 - Donor/Desynced - node is the donor to the node joining the cluster
+#3 - Joined - node has joined the cluster
+#4 - Synced - node is synced with the cluster
+$MYSQL_BIN $MYSQL_OPTS --host=$MYSQL_HOST --port=$MYSQL_PORT --user=$MYSQL_USERNAME --password=$MYSQL_PASSWORD -e "$CHECK_QUERY" > $TMP_FILE 2> $ERR_FILE
+
+# if the mysql command failed, return state 503 failure
+if [ $? -ne 0 ]; then
+   return_fail "retrieving wsrep_% state from mysql failed";
+else
+    debug_log "mysql command succesfull"
+fi
+
+# get the result of our wsrep_local_state
+debug_log "Gathering local Galera status variables"
+wsrep_local_state=`grep wsrep_local_state  $TMP_FILE | awk '{print $2;}'`
+wsrep_connected=`grep wsrep_connected $TMP_FILE | awk '{print $2;}'`
+wsrep_cluster_status=`grep $rep_cluster_status $TMP_FILE | awk '{print $2;}'`
+wsrep_ready=`grep wsrep_ready $TMP_FILE | awk '{print $2;}'`
+wsrep_cluster_state_uuid=`grep wsrep_cluster_state_uuid $TMP_FILE | awk '{print $2;}'`
+wsrep_local_state_uuid=`grep wsrep_local_state_uuid $TMP_FILE | awk '{print $2;}'`
+
+debug_log "Checking Galera status variables"
+# if state is not 2 or 4, return an error
+if [ $wsrep_local_state -ne 4 ] && [ $wsrep_local_state -ne 2 ]; then
+   return_fail "State of wsrep_local_state is not 2 or 4";
+fi
+
+# is wsrep_connected set to ON?
+if [ $wsrep_connected -ne "ON" ]; then
+   return_fail "State of wsrep_connected is not ON"
+fi
+
+# is wsrep_cluster_status set to Primary?
+if [ $wsrep_cluster_status -ne "Primary" ]; then
+   return_fail "State of wsrep_cluster_status is not Primary"
+fi
+
+# is wsrep_ready set to ON?
+if [ $wsrep_ready -ne "ON" ]; then
+   return_fail "State of wsrep_ready is not ON"
+fi
+
+# is wsrep_cluster_state_uuid equal to wsrep_local_state_uuid?
+if [ $wsrep_cluster_state_uuid -ne $wsrep_local_state_uuid ]; then
+   return_fail "Value of wsrep_cluster_state_uuid does not match wsrep_local_state_uuid"
 fi
 
 return_ok;
