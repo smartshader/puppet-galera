@@ -129,27 +129,27 @@ wsrep_local_state_uuid=`grep wsrep_local_state_uuid $TMP_FILE | awk '{print $2;}
 debug_log "Checking Galera status variables"
 # if state is not 2 or 4, return an error
 if [ $wsrep_local_state -ne 4 ] && [ $wsrep_local_state -ne 2 ]; then
-   return_fail "State of wsrep_local_state is not 2 or 4";
+   return_fail "State of wsrep_local_state is not 2 or 4, but '${wsrep_local_state}'";
 fi
 
 # is wsrep_connected set to ON?
-if [ $wsrep_connected -ne "ON" ]; then
-   return_fail "State of wsrep_connected is not ON"
+if [ "$wsrep_connected" != "ON" ]; then
+   return_fail "State of wsrep_connected is not ON, but '${wsrep_connected}'"
 fi
 
 # is wsrep_cluster_status set to Primary?
-if [ $wsrep_cluster_status -ne "Primary" ]; then
-   return_fail "State of wsrep_cluster_status is not Primary"
+if [ "$wsrep_cluster_status" != "Primary" ]; then
+   return_fail "State of wsrep_cluster_status is not Primary, but '${wsrep_cluster_status}'"
 fi
 
 # is wsrep_ready set to ON?
-if [ $wsrep_ready -ne "ON" ]; then
-   return_fail "State of wsrep_ready is not ON"
+if [ "$wsrep_ready" != "ON" ]; then
+   return_fail "State of wsrep_ready is not ON, but '${wsrep_ready}'"
 fi
 
 # is wsrep_cluster_state_uuid equal to wsrep_local_state_uuid?
-if [ $wsrep_cluster_state_uuid -ne $wsrep_local_state_uuid ]; then
-   return_fail "Value of wsrep_cluster_state_uuid does not match wsrep_local_state_uuid"
+if [ "$wsrep_cluster_state_uuid" != "$wsrep_local_state_uuid" ]; then
+   return_fail "Value of wsrep_cluster_state_uuid ('${wsrep_cluster_state_uuid}') does not match wsrep_local_state_uuid ('${wsrep_local_state_uuid}')"
 fi
 
 return_ok;
