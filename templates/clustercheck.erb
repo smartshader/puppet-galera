@@ -119,9 +119,9 @@ fi
 
 # get the result of our wsrep_local_state
 debug_log "Gathering local Galera status variables"
-wsrep_local_state=`grep wsrep_local_state  $TMP_FILE | awk '{print $2;}'`
+wsrep_local_state=`grep 'wsrep_local_state\s' $TMP_FILE | awk '{print $2;}'`
 wsrep_connected=`grep wsrep_connected $TMP_FILE | awk '{print $2;}'`
-wsrep_cluster_status=`grep $rep_cluster_status $TMP_FILE | awk '{print $2;}'`
+wsrep_cluster_status=`grep wsrep_cluster_status $TMP_FILE | awk '{print $2;}'`
 wsrep_ready=`grep wsrep_ready $TMP_FILE | awk '{print $2;}'`
 wsrep_cluster_state_uuid=`grep wsrep_cluster_state_uuid $TMP_FILE | awk '{print $2;}'`
 wsrep_local_state_uuid=`grep wsrep_local_state_uuid $TMP_FILE | awk '{print $2;}'`
