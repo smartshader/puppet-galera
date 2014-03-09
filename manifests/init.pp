@@ -40,6 +40,11 @@ class galera (
     require       => Class['::mysql::server::service'],
   }
 
+  mysql_grant { "${wsrep_sst_auth_user}@%/*.*":
+    ensure      => present,
+    privileges  => ['CREATE TABLESPACE', 'RELOAD', 'LOCK TABLES', 'REPLICATION CLIENT', 'SUPER'],
+  }
+
   package { 'galera':
     ensure  => present,
     name    => $package_name,
