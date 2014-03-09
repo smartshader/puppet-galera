@@ -43,6 +43,8 @@ class galera (
   mysql_grant { "${wsrep_sst_auth_user}@%/*.*":
     ensure      => present,
     privileges  => ['CREATE TABLESPACE', 'RELOAD', 'LOCK TABLES', 'REPLICATION CLIENT', 'SUPER'],
+    table       => '*.*',
+    user        => "${wsrep_sst_auth_user}@%",
   }
 
   package { 'galera':
