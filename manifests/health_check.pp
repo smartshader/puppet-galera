@@ -40,7 +40,7 @@ class galera::health_check(
 
   if $enabled {
     $service_ensure = 'running'
-   } else {
+  } else {
     $service_ensure = 'stopped'
   }
 
@@ -71,8 +71,8 @@ class galera::health_check(
     server      => "${mysqlchk_script_dir}/clustercheck",
     log_on_failure => 'USERID',
     only_from   => '0.0.0.0/0',
-    per_source  => "UNLIMITED",
-  }  
+    per_source  => 'UNLIMITED',
+  }
 
   # Manage mysqlchk service in /etc/services
   augeas { "mysqlchk":
