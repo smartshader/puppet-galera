@@ -1,0 +1,10 @@
+name    'OlinData-galera'
+version '0.8.0'
+source  'https://github.com/olindata/puppet-galera'
+author  'Walter Heck <walterheck@olindata.com>'
+license 'Apache License 2.0'
+summary 'OlinData Galera  Module'
+description  'This module configures galera to support multi-master mysql.'
+project_page 'https://github.com/olindata/puppet-galera'
+
+dependency 'puppetlabs/mysql', '>= 0.8.1'
