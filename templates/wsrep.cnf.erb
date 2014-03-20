@@ -55,10 +55,10 @@ wsrep_provider_options=<%= @wsrep_provider_options -%>
 wsrep_cluster_name="<%= @cluster_name -%>"
 
 # Group communication system handle
-<% if master_ip -%>
-wsrep_cluster_address="gcomm://<%= @master_ip %>"
+<% if wsrep_cluster_address -%>
+wsrep_cluster_address="<%= @wsrep_cluster_address %>"
 <% else -%>
-wsrep_cluster_address="gcomm://"
+#wsrep_cluster_address="gcomm://"
 <% end -%>
 
 # Human-readable node name (non-unique). Hostname by default.

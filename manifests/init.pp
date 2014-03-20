@@ -1,7 +1,6 @@
 
 class galera (
   $cluster_name                = 'galera',
-  $master_ip                   = false,
   $package_name                = 'galera',
   $mysql_bind_address          = '0.0.0.0',
   $wsrep_provider              = '/usr/lib/galera/libgalera_smm.so',
@@ -16,6 +15,7 @@ class galera (
   $wsrep_sst_auth              = '',
   $wsrep_sst_receive_address   = $::ipaddress,
   $wsrep_sst_donor             = '',
+  $wsrep_cluster_address       = false,
   $wsrep_slave_threads         = 1,) {
   # validate parameters
   validate_string($wsrep_sst_auth_user)
