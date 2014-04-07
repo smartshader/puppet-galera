@@ -127,10 +127,17 @@ wsrep_cluster_state_uuid=`grep wsrep_cluster_state_uuid $TMP_FILE | awk '{print 
 wsrep_local_state_uuid=`grep wsrep_local_state_uuid $TMP_FILE | awk '{print $2;}'`
 
 debug_log "Checking Galera status variables"
+<% if @report_donating_node_as_healthy -%>
 # if state is not 2 or 4, return an error
 if [ $wsrep_local_state -ne 4 ] && [ $wsrep_local_state -ne 2 ]; then
    return_fail "State of wsrep_local_state is not 2 or 4, but '${wsrep_local_state}'";
 fi
+<% else -%>
+# if state is not 4, return an error
+if [ $wsrep_local_state -ne 4 ] ; then
+   return_fail "State of wsrep_local_state is not 4, but '${wsrep_local_state}'";
+fi
+<% end -%>
 
 # is wsrep_connected set to ON?
 if [ "$wsrep_connected" != "ON" ]; then

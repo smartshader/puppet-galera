@@ -28,6 +28,7 @@ class galera::health_check(
   $xinetd_dir 	        = '/etc/xinetd.d',
   $mysqlchk_user        = 'mysqlchk_user',
   $mysqlchk_password    = 'mysqlchk_password',
+  $report_donating_node_as_healthy = false,
   $enabled              = true,
   $debug                = 0,
 ) {
