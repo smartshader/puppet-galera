@@ -1,0 +1,98 @@
+#!/bin/bash
+
+##
+## config
+DEBUG=1
+MYSQL_BIN=`which mysql`
+INNOBACKUP_BIN=`which innobackupex`
+
+BACKUP_DIR='/root/backup'
+FULL_BACKUP_OPTS=' --galera-info --parallel=16 --compress --no-timestamp'
+INCREMENTAL_BACKUP_DIR='/root/backup/incremental'
+INCREMENTAL_OPTS=" --galera-info --parallel=16 --compress --incremental ${INCREMENTAL_BACKUP_DIR} \
+--incremental-basedir ${BACKUP_DIR}/full"
+
+##
+## local functions
+
+# FUNCTION debug_log
+debug_log()
+{
+  if [ $DEBUG -eq 1 ]; then
+      echo -e "DEBUG: ${1}"
+  fi
+}
+
+# FUNCTION galera_desync
+galera_desync() {
+
+  $MYSQL_BIN -e "set global wsrep_desync = '${1}'"
+
+  if [ $? -ne 0 ]; then
+    debug_log "WARNING: galera_desync failed to set to: '${1}'"
+    exit 1
+  fi
+
+}
+
+parse_options() {
+  if (($# == 0)); then
+    debug_log "no command line options found"
+    exit 1
+  fi
+
+  while getopts ":t:" opt; do
+    case $opt in
+      t)
+        debug_log "-t was triggered, Parameter: $OPTARG"
+        TYPE=$OPTARG
+        ;;
+      \?)
+        debug_log "Invalid option: -$OPTARG"
+        exit 1
+        ;;
+      :)
+        debug_log "Option -$OPTARG requires an argument."
+        exit 1
+      ;;
+    esac
+  done
+
+}
+
+innobackup_full() {
+
+  debug_log "Full backup triggered"
+
+  /bin/mkdir -p "$BACKUP_DIR"
+  $INNOBACKUP_BIN $FULL_BACKUP_OPTS ${BACKUP_DIR}/full
+
+}
+
+innobackup_incremental() {
+
+  debug_log "Incremental backup triggered"
+  /bin/mkdir -p "$BACKUP_DIR/incremental"
+  $INNOBACKUP_BIN $INCREMENTAL_OPTS
+
+}
+
+## main section
+
+
+parse_options "$@"
+
+# desync the node
+galera_desync ON
+
+# take the backup
+
+if [ "$TYPE" == 'full' ]; then
+  innobackup_full
+else
+  innobackup_incremental
+fi
+
+# resync the node
+galera_desync OFF
+exit 0
