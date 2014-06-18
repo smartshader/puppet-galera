@@ -12,6 +12,7 @@ class galera (
   $wsrep_sst_method            = 'xtrabackup-v2',
   $wsrep_sst_auth_user         = 'root',
   $wsrep_sst_auth_password     = 'root',
+  $wsrep_sst_auth_host         = 'localhost',
   $wsrep_sst_auth              = '',
   $wsrep_sst_receive_address   = $::ipaddress,
   $wsrep_sst_donor             = '',
@@ -34,17 +35,17 @@ class galera (
     $real_wsrep_sst_auth = "${wsrep_sst_auth_user}:${wsrep_sst_auth_password}"
   }
 
-  mysql_user { "${wsrep_sst_auth_user}@%":
+  mysql_user { "${wsrep_sst_auth_user}@${wsrep_sst_auth_host}":
     ensure        => present,
     password_hash => mysql_password($wsrep_sst_auth_password),
     require       => Class['::mysql::server::service'],
   }
 
-  mysql_grant { "${wsrep_sst_auth_user}@%/*.*":
+  mysql_grant { "${wsrep_sst_auth_user}@${wsrep_sst_auth_host}/*.*":
     ensure      => present,
     privileges  => ['CREATE TABLESPACE', 'RELOAD', 'LOCK TABLES', 'REPLICATION CLIENT', 'SUPER'],
     table       => '*.*',
-    user        => "${wsrep_sst_auth_user}@%",
+    user        => "${wsrep_sst_auth_user}@${wsrep_sst_auth_host}",
   }
 
   package { 'galera':
