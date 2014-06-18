@@ -28,6 +28,7 @@ class galera::health_check(
   $xinetd_dir 	        = '/etc/xinetd.d',
   $mysqlchk_user        = 'mysqlchk_user',
   $mysqlchk_password    = 'mysqlchk_password',
+  $mysqlchk_port        = 9200,
   $report_donating_node_as_healthy = false,
   $enabled              = true,
   $debug                = 0,
@@ -66,7 +67,7 @@ class galera::health_check(
     disable     => 'no',
     flags       => 'REUSE',
     socket_type => 'stream',
-    port        => '9200',
+    port        => $mysqlchk_port,
     wait        => 'no',
     user        => nobody,
     server      => "${mysqlchk_script_dir}/clustercheck",
@@ -82,10 +83,10 @@ class galera::health_check(
     changes => [
       "ins service-name after service-name[last()]",
       "set service-name[last()] mysqlchk",
-      "set service-name[. = 'mysqlchk']/port 9200",
+      "set service-name[. = 'mysqlchk']/port ${mysqlchk_port}",
       "set service-name[. = 'mysqlchk']/protocol tcp",
     ],
-    onlyif => "match service-name[port = '9200'] size == 0",
+    onlyif => "match service-name[port = '${mysqlchk_port}'] size == 0",
   }
 
   # Create a user for script to use for checking MySQL health status.
