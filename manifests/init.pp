@@ -3,6 +3,7 @@ class galera (
   $cluster_name                = 'galera',
   $package_name                = 'galera',
   $mysql_bind_address          = '0.0.0.0',
+  $mysql_config_directory      = '/etc/mysql/conf.d/',
   $wsrep_provider              = '/usr/lib/galera/libgalera_smm.so',
   $wsrep_provider_options      = '',
   $wsrep_node_name             = $::hostname,
@@ -51,10 +52,10 @@ class galera (
   package { 'galera':
     ensure  => present,
     name    => $package_name,
-    require => Package['mysql_client'],
+    require => Package['mysql-server'],  
   }
 
-  file { '/etc/mysql/conf.d/wsrep.cnf':
+  file { "${mysql_config_directory}/wsrep.cnf":
     ensure  => present,
     content => template('galera/wsrep.cnf.erb'),
     require => Package['galera'],
