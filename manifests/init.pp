@@ -52,6 +52,7 @@ class galera (
   package { 'galera':
     ensure  => present,
     name    => $package_name,
+    require => Package['mysql-server'],  
   }
 
   file { "${mysql_config_directory}/wsrep.cnf":
