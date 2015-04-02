@@ -21,19 +21,19 @@ The puppet-galera module installs, configures, and manages a mysql galera instal
 
 ##Module Description
 
-<!--The MySQL module manages both the installation and configuration of MySQL as
+The MySQL module manages both the installation and configuration of MySQL as
 well as extends Pupppet to allow management of MySQL resources, such as
-databases, users, and grants.-->
+databases, users, and grants.
 
 ##Backwards Compatibility
 
-<!--This module has just undergone a very large rewrite, the original was written by .  As a result it will no
+This module has just undergone a very large rewrite, the original was written by .  As a result it will no
 longer work with the previous classes and configuration as before.  We've
 attempted to handle backwards compatibility automatically by adding a
 `attempt_compatibility_mode` parameter to the main mysql class.  If you set
 this to true it will attempt to map your previous parameters into the new
 `mysql::server` class.
--->
+
 ###WARNING
 
 This may fail.  It may eat your MySQL server.  PLEASE test it before running it
@@ -43,13 +43,13 @@ live.  Even if it's just a no-op and a manual comparision.  Please be careful!
 
 ###What MySQL affects
 
-<!--* MySQL package.
+* MySQL package.
 * MySQL configuration files.
 * MySQL service.
--->
+
 ###Beginning with MySQL
 
-<!--If you just want a server installing with the default options you can run
+If you just want a server installing with the default options you can run
 `include '::mysql::server'`.  If you need to customize options, such as the root
 password or /etc/my.cnf settings then you can also include `mysql::server` and
 pass in an override hash as seen below:
@@ -60,16 +60,16 @@ class { '::mysql::server':
   override_options => { 'mysqld' => { 'max_connections' => '1024' } }
 }
 ```
--->
+
 ##Usage
 
-<!--All interaction for the server is done via `mysql::server`.  To install the
+All interaction for the server is done via `mysql::server`.  To install the
 client you use `mysql::client`, and to install bindings you can use
 `mysql::bindings`.
--->
+
 ###Overrides
 
-<!--The hash structure for overrides in `mysql::server` is as follows:
+The hash structure for overrides in `mysql::server` is as follows:
 
 ```puppet
 $override_options = {
@@ -88,29 +88,29 @@ thing
 
 You can just make an entry like `thing => true` in the hash.  MySQL doesn't
 care if thing is alone or set to a value, it'll happily accept both.
--->
+
 ###Custom configuration
 
-<!--To add custom mysql configuration you can drop additional files into
+To add custom mysql configuration you can drop additional files into
 `/etc/mysql/conf.d/` in order to override settings or add additional ones (if you
 choose not to use override_options in `mysql::server`).  This location is
 hardcoded into the my.cnf template file.
--->
+
 ##Reference
 
 ###Classes
 
 ####Public classes
-<!--* `mysql::server`: Installs and configures MySQL.
+* `mysql::server`: Installs and configures MySQL.
 * `mysql::server::account_security`: Deletes default MySQL accounts.
 * `mysql::server::monitor`: Sets up a monitoring user.
 * `mysql::server::mysqltuner`: Installs MySQL tuner script.
 * `mysql::server::backup`: Sets up MySQL backups via cron.
 * `mysql::bindings`: Installs various MySQL language bindings.
 * `mysql::client`: Installs MySQL client (for non-servers).
--->
+
 ####Private classes
-<!--* `mysql::server::install`: Installs packages.
+* `mysql::server::install`: Installs packages.
 * `mysql::server::config`: Configures MYSQL.
 * `mysql::server::service`: Manages service.
 * `mysql::server::root_password`: Sets MySQL root password.
@@ -120,10 +120,10 @@ hardcoded into the my.cnf template file.
 * `mysql::bindings::python`: Installs Python bindings.
 * `mysql::bindings::ruby`: Installs Ruby bindings.
 * `mysql::client::install`:  Installs MySQL client.
--->
+
 ###Parameters
 
-<!--####mysql::server
+####mysql::server
 
 #####`root_password`
 
@@ -135,11 +135,11 @@ MySQL user to create for backing up.
 
 #####`backuppassword`
 
-MySQL user password for backups.-->
+MySQL user password for backups.
 
 ###Providers
 
-<!--####mysql_database
+####mysql_database
 
 mysql_database can be used to create and manage databases within MySQL:
 
@@ -154,7 +154,7 @@ mysql_database { 'mysql':
   charset => 'latin1',
   collate => 'latin1_swedish_ci',
 }
-```-->
+```
 
 ##Limitations
 
