@@ -1,6 +1,5 @@
 
 
-
 #MySQL
 
 ####Table of Contents
