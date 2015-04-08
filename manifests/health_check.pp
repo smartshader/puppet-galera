@@ -25,7 +25,7 @@ class galera::health_check(
   $mysql_bin_dir        = '/usr/bin/mysql',
   $mysql_datadir        = '/var/lib/mysql',
   $mysqlchk_script_dir  = '/usr/local/bin',
-  $xinetd_dir 	        = '/etc/xinetd.d',
+  $xinetd_dir           = '/etc/xinetd.d',
   $mysqlchk_user        = 'mysqlchk_user',
   $mysqlchk_password    = 'mysqlchk_password',
   $mysqlchk_port        = 9200,

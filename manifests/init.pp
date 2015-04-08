@@ -2,8 +2,10 @@
 class galera (
   $cluster_name                = 'galera',
   $package_name                = 'galera',
+  $mysql_package               = 'mysql-server',
   $mysql_bind_address          = '0.0.0.0',
   $mysql_config_directory      = '/etc/mysql/conf.d/',
+  $wsrep_master                = true,
   $wsrep_provider              = '/usr/lib/galera/libgalera_smm.so',
   $wsrep_provider_options      = '',
   $wsrep_node_name             = $::hostname,
@@ -49,18 +51,36 @@ class galera (
     user        => "${wsrep_sst_auth_user}@${wsrep_sst_auth_host}",
   }
 
-  package { 'galera':
-    ensure  => present,
-    name    => $package_name,
-    require => Package['mysql-server'],  
-  }
+  #if $package_name and $package_name != undef {
+    #package { 'galera':
+      #ensure  => present,
+      #name    => $package_name,
+      #require => Package[$mysql_package],
+    #}
+  #}
 
   file { "${mysql_config_directory}/wsrep.cnf":
     ensure  => present,
     content => template('galera/wsrep.cnf.erb'),
-    require => Package['galera'],
-    notify  => Class['::mysql::server::service'],
+    #require => Package['galera'],
   }
+
+  if $wsrep_master {
+    File["${mysql_config_directory}/wsrep.cnf"] ~> Exec['start-galera-master']
+    exec { 'start-galera-master':
+      command => 'service mysql stop; service mysql start --wsrep-new-cluster',
+      path    => '/bin:/usr/bin:/sbin:/usr/sbin',
+      user    => 'root',
+    }
+  } else {
+    File["${mysql_config_directory}/wsrep.cnf"] ~> Exec['start-galera-node']
+    exec { 'start-galera-node':
+      command => 'service mysql restart',
+      path    => '/bin:/usr/bin:/sbin:/usr/sbin',
+      user    => 'root',
+    }
+  }
+
 
   # needed for setting progress=1 under [sst] in the galera config file
   package {'pv': ensure => present, }
