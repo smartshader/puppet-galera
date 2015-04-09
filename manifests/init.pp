@@ -68,9 +68,10 @@ class galera (
   if $wsrep_master {
     File["${mysql_config_directory}/wsrep.cnf"] ~> Exec['start-galera-master']
     exec { 'start-galera-master':
-      command => 'service mysql stop; service mysql start --wsrep-new-cluster',
-      path    => '/bin:/usr/bin:/sbin:/usr/sbin',
-      user    => 'root',
+      command   => 'service mysql stop; service mysql start --wsrep-new-cluster',
+      path      => '/bin:/usr/bin:/sbin:/usr/sbin',
+      user      => 'root',
+      subscribe => File["${mysql_config_directory}/wsrep.cnf"],
     }
   } else {
     File["${mysql_config_directory}/wsrep.cnf"] ~> Exec['start-galera-node']
@@ -78,6 +79,7 @@ class galera (
       command => 'service mysql restart',
       path    => '/bin:/usr/bin:/sbin:/usr/sbin',
       user    => 'root',
+      subscribe => File["${mysql_config_directory}/wsrep.cnf"],
     }
   }
 
