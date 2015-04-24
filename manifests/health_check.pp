@@ -20,6 +20,7 @@
 # class {'galera::health_check': }
 #
 class galera::health_check(
+  $create_mysqlchk_user = false,
   $mysql_host           = '127.0.0.1',
   $mysql_port           = '3306',
   $mysql_bin_dir        = '/usr/bin/mysql',
@@ -90,9 +91,11 @@ class galera::health_check(
   }
 
   # Create a user for script to use for checking MySQL health status.
-  mysql_user { "${mysqlchk_user}@${mysql_host}":
-    ensure        => present,
-    password_hash => mysql_password($mysqlchk_password),
-    require       => Class['::mysql::server::service'],
+  if $create_mysqlchk_user {
+    mysql_user { "${mysqlchk_user}@${mysql_host}":
+      ensure        => present,
+      password_hash => mysql_password($mysqlchk_password),
+      require       => Class['::mysql::server::service'],
+    }
   }
 }
